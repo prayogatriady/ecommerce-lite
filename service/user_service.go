@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"log"
 
 	"github.com/prayogatriady/ecommerce-lite/model/table"
@@ -16,7 +15,6 @@ type UserServiceInterface interface {
 
 type UserService struct {
 	Repository repository.UserRepositoryInterface
-	DB         *sql.DB
 }
 
 func (s *UserService) GetAll() ([]table.UserDummy, error) {
@@ -28,12 +26,8 @@ func (s *UserService) GetAll() ([]table.UserDummy, error) {
 }
 
 func (s *UserService) FindUsers(ctx context.Context) ([]table.User, error) {
-	tx, err := s.DB.Begin()
-	if err != nil {
-		log.Printf("[UserService][FindUsers][Begin]: %s\n", err)
-	}
 
-	user, err := s.Repository.SelectUsers(ctx, tx)
+	user, err := s.Repository.SelectUsers(ctx)
 	if err != nil {
 		log.Printf("[UserService][FindUsers][SelectUsers]: %s\n", err)
 	}

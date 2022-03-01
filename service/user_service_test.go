@@ -13,11 +13,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestService_GetUser(t *testing.T) {
-	repository := repository.UserRepositoryMock{}
-	repository.Mock.On("FindAll").Return([]table.UserDummy{}, nil)
+var userRepository = &repository.UserRepositoryMock{Mock: mock.Mock{}}
 
-	service := UserService{Repository: &repository}
+func TestService_GetUser(t *testing.T) {
+
+	userRepository.Mock.On("FindAll").Return([]table.UserDummy{}, nil)
+
+	service := UserService{Repository: userRepository}
 	users, _ := service.GetAll()
 	for i := range users {
 		fmt.Println(users[i].Password)
@@ -35,13 +37,13 @@ func TestService_SelectUsers(t *testing.T) {
 		{UserID: "jisoo", Password: "jisoo", Email: "jisoo@gmail.com"},
 	}
 
-	repository := &repository.UserRepositoryMock{Mock: mock.Mock{}}
-	repository.Mock.On("SelectUsers", ctx, repository.Mock).Return(users, nil)
+	userRepository.Mock.On("SelectUsers", ctx).Return(users, nil)
 
-	service := UserService{Repository: repository}
-	users, err := service.FindUsers(ctx)
+	service := UserService{Repository: userRepository}
+	result, err := service.FindUsers(ctx)
 	if err != nil {
 		log.Printf("[TestService_SelectUsers][FindUsers]: %s\n", err)
 	}
-	fmt.Println(users)
+	// fmt.Println(result)
+	assert.Equal(t, users[0].UserID, result[0].UserID)
 }

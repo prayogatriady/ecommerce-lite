@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/prayogatriady/ecommerce-lite/model/table"
 	"github.com/stretchr/testify/mock"
@@ -22,9 +21,16 @@ func (r *UserRepositoryMock) FindAll() ([]table.UserDummy, error) {
 	return users, args.Error(1)
 }
 
-func (r *UserRepositoryMock) SelectUsers(ctx context.Context, tx *sql.Tx) ([]table.User, error) {
-	args := r.Mock.Called(ctx, tx)
+func (r *UserRepositoryMock) SelectUsers(ctx context.Context) ([]table.User, error) {
+	args := r.Mock.Called(ctx)
 
-	users := args.Get(0).([]table.User)
-	return users, nil
+	// users := args.Get(0).([]table.User)
+	// return users, nil
+
+	if args.Get(0) == nil {
+		return nil, nil
+	} else {
+		users := args.Get(0).([]table.User)
+		return users, nil
+	}
 }
