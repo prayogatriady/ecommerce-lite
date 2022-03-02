@@ -7,7 +7,7 @@ type User struct {
 	FullName   string    `json:"full_name"`
 	Password   string    `json:"password"`
 	GroupUser  string    `json:"group_user"`
-	Balance    string    `json:"balance"`
+	Balance    int       `json:"balance"`
 	Phone      string    `json:"phone"`
 	Email      string    `json:"email"`
 	IsCustomer string    `json:"is_customer"`

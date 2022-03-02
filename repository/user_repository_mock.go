@@ -34,3 +34,26 @@ func (r *UserRepositoryMock) SelectUsers(ctx context.Context) ([]table.User, err
 		return users, nil
 	}
 }
+
+func (r *UserRepositoryMock) SelectUserByUserID(ctx context.Context, userID string) (table.User, error) {
+	args := r.Mock.Called(ctx, userID)
+
+	var user table.User
+	if args.Get(0) == nil {
+		return user, nil
+	} else {
+		user = args.Get(0).(table.User)
+		return user, nil
+	}
+}
+
+func (r *UserRepositoryMock) InsertUser(ctx context.Context, user table.User) (table.User, error) {
+	args := r.Mock.Called(ctx, user)
+
+	if args.Get(0) == nil {
+		return user, nil
+	} else {
+		user = args.Get(0).(table.User)
+		return user, nil
+	}
+}

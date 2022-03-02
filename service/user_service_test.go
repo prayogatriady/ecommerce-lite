@@ -44,6 +44,54 @@ func TestService_SelectUsers(t *testing.T) {
 	if err != nil {
 		log.Printf("[TestService_SelectUsers][FindUsers]: %s\n", err)
 	}
-	// fmt.Println(result)
+
+	fmt.Println(users)
+	fmt.Println(result)
 	assert.Equal(t, users[0].UserID, result[0].UserID)
+}
+
+func TestService_SelectUserByUserID(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	user := table.User{
+		UserID:   "dobow",
+		Password: "dobow",
+		Email:    "dobow@gmail.com",
+	}
+
+	userRepository.Mock.On("SelectUserByUserID", ctx, "dobow").Return(user, nil)
+
+	service := UserService{Repository: userRepository}
+	result, err := service.FindUserByUserID(ctx, "dobow")
+	if err != nil {
+		log.Printf("[TestService_SelectUserByUserID][FindUserByUserID]: %s\n", err)
+	}
+
+	fmt.Println(user)
+	fmt.Println(result)
+	assert.Equal(t, user.UserID, result.UserID)
+}
+
+func TestService_InsertUser(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	user := table.User{
+		UserID:   "dobow",
+		Password: "dobow",
+		Email:    "dobow@gmail.com",
+	}
+
+	userRepository.Mock.On("InsertUser", ctx, user).Return(user, nil)
+
+	service := UserService{Repository: userRepository}
+	result, err := service.SignUp(ctx, user)
+	if err != nil {
+		log.Printf("[TestService_InsertUser][SignUp]: %s\n", err)
+	}
+
+	fmt.Println(user)
+	fmt.Println(result)
+	assert.Equal(t, user.UserID, result.UserID)
 }

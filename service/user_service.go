@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/prayogatriady/ecommerce-lite/model/table"
 	"github.com/prayogatriady/ecommerce-lite/repository"
@@ -11,6 +12,8 @@ import (
 type UserServiceInterface interface {
 	GetAll() ([]table.UserDummy, error)
 	FindUsers(ctx context.Context) ([]table.User, error)
+	FindUserByUserID(ctx context.Context, userID string) (table.User, error)
+	SignUp(ctx context.Context, user table.User) (table.User, error)
 }
 
 type UserService struct {
@@ -30,6 +33,28 @@ func (s *UserService) FindUsers(ctx context.Context) ([]table.User, error) {
 	user, err := s.Repository.SelectUsers(ctx)
 	if err != nil {
 		log.Printf("[UserService][FindUsers][SelectUsers]: %s\n", err)
+	}
+
+	return user, err
+}
+
+func (s *UserService) FindUserByUserID(ctx context.Context, userID string) (table.User, error) {
+
+	user, err := s.Repository.SelectUserByUserID(ctx, userID)
+	if err != nil {
+		log.Printf("[UserService][FindUserByUserID][SelectUserByUserID]: %s\n", err)
+	}
+
+	return user, err
+}
+
+func (s *UserService) SignUp(ctx context.Context, user table.User) (table.User, error) {
+
+	user.FullName = strings.ToUpper(user.FullName)
+
+	user, err := s.Repository.InsertUser(ctx, user)
+	if err != nil {
+		log.Printf("[UserService][SignUp][InsertUser]: %s\n", err)
 	}
 
 	return user, err
