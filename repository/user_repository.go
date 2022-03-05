@@ -12,15 +12,12 @@ import (
 
 type UserRepositoryInterface interface {
 	FindAll() ([]table.UserDummy, error)
+
 	SelectUsers(ctx context.Context) ([]table.User, error)
 	SelectUserByUserID(ctx context.Context, userID string) (table.User, error)
 	InsertUser(ctx context.Context, user table.User) (table.User, error)
-
-	// Insert(ctx context.Context, user table.User) table.User
-	// Update(ctx context.Context, user table.User) table.User
-	// Delete(ctx context.Context, user table.User)
-	// FindByUserID(ctx context.Context, user table.User) (table.User, error)
-	// FindAll(ctx context.Context, tx *sql.Tx) []table.User
+	UpdateUser(ctx context.Context, user table.User) (table.User, error)
+	DeleteUser(ctx context.Context, userID string) error
 	// FindByUserIDPassword(ctx context.Context, user table.User) (table.User, error)
 }
 
@@ -28,20 +25,6 @@ type UserRepository struct {
 }
 
 var db *sql.DB = database.NewDB()
-
-// func NewUserRepository() UserRepository {
-// 	return &UserRepositoryImpl{}
-// }
-
-// func (userRepo *UserRepositoryImpl) Insert(ctx context.Context, user table.User) table.User {
-// 	query := "insert into users (user_id, full_name, password, phone, email, isCustomer) VALUES (?,?,?,?)"
-// 	_, err := tx.ExecContext(ctx, query, user.UserID, user.FullName, user.Password, user.Email, user.Email, user.IsCustomer)
-// 	if err != nil {
-// 		log.Printf("Insert: %s\n", err)
-// 	}
-
-// 	return user
-// }
 
 func (r *UserRepository) FindAll() ([]table.UserDummy, error) {
 	users := []table.UserDummy{
@@ -127,4 +110,48 @@ func (r *UserRepository) InsertUser(ctx context.Context, user table.User) (table
 	}
 
 	return user, err
+}
+
+func (r *UserRepository) UpdateUser(ctx context.Context, user table.User) (table.User, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("[UserRepository][UpdateUser][Begin]: %s\n", err)
+	}
+	defer tx.Rollback()
+
+	query := `UPDATE users SET full_name = ?, password = ?, group_user = ?, balance = ?, phone = ?, email = ?, 
+			isCustomer = ?, isSeller = ?, isShipper = ? WHERE user_id = ?`
+
+	_, err = tx.ExecContext(ctx, query, user.FullName, user.Password, user.GroupUser, user.Balance,
+		user.Phone, user.Email, user.IsCustomer, user.IsSeller, user.IsShipper, user.UserID)
+	if err != nil {
+		log.Printf("[UserRepository][UpdateUser][ExecContext]: %s\n", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Printf("[UserRepository][UpdateUser][Commit]: %s\n", err)
+	}
+
+	return user, err
+}
+
+func (r *UserRepository) DeleteUser(ctx context.Context, userID string) error {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("[UserRepository][DeleteUser][Begin]: %s\n", err)
+	}
+	defer tx.Rollback()
+
+	query := `DELETE FROM users WHERE user_id = ?`
+
+	_, err = tx.ExecContext(ctx, query, userID)
+	if err != nil {
+		log.Printf("[UserRepository][DeleteUser][ExecContext]: %s\n", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Printf("[UserRepository][DeleteUser][Commit]: %s\n", err)
+	}
+
+	return err
 }

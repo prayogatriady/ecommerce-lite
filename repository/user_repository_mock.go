@@ -57,3 +57,20 @@ func (r *UserRepositoryMock) InsertUser(ctx context.Context, user table.User) (t
 		return user, nil
 	}
 }
+
+func (r *UserRepositoryMock) UpdateUser(ctx context.Context, user table.User) (table.User, error) {
+	args := r.Mock.Called(ctx, user)
+
+	if args.Get(0) == nil {
+		return user, nil
+	} else {
+		user = args.Get(0).(table.User)
+		return user, nil
+	}
+}
+
+func (r *UserRepositoryMock) DeleteUser(ctx context.Context, userID string) error {
+	r.Mock.Called(ctx, userID)
+
+	return nil
+}

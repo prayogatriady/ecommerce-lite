@@ -14,6 +14,8 @@ type UserServiceInterface interface {
 	FindUsers(ctx context.Context) ([]table.User, error)
 	FindUserByUserID(ctx context.Context, userID string) (table.User, error)
 	SignUp(ctx context.Context, user table.User) (table.User, error)
+	EditProfile(ctx context.Context, user table.User) (table.User, error)
+	RemoveUser(ctx context.Context, userID string) error
 }
 
 type UserService struct {
@@ -58,4 +60,24 @@ func (s *UserService) SignUp(ctx context.Context, user table.User) (table.User, 
 	}
 
 	return user, err
+}
+
+func (s *UserService) EditProfile(ctx context.Context, user table.User) (table.User, error) {
+	user.FullName = strings.ToUpper(user.FullName)
+
+	user, err := s.Repository.UpdateUser(ctx, user)
+	if err != nil {
+		log.Printf("[UserService][EditProfile][UpdateUser]: %s\n", err)
+	}
+
+	return user, err
+}
+
+func (s *UserService) RemoveUser(ctx context.Context, userID string) error {
+	err := s.Repository.DeleteUser(ctx, userID)
+	if err != nil {
+		log.Printf("[UserService][RemoveUser][DeleteUser]: %s\n", err)
+	}
+
+	return err
 }

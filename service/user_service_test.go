@@ -95,3 +95,43 @@ func TestService_InsertUser(t *testing.T) {
 	fmt.Println(result)
 	assert.Equal(t, user.UserID, result.UserID)
 }
+
+func TestService_UpdateUser(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	user := table.User{
+		UserID:   "dobow",
+		Password: "dobow",
+		Email:    "dobow@gmail.com",
+	}
+
+	userRepository.Mock.On("UpdateUser", ctx, user).Return(user, nil)
+
+	service := UserService{Repository: userRepository}
+	result, err := service.EditProfile(ctx, user)
+	if err != nil {
+		log.Printf("[TestService_UpdateUser][EditProfile]: %s\n", err)
+	}
+
+	fmt.Println(user)
+	fmt.Println(result)
+	assert.Equal(t, user.UserID, result.UserID)
+}
+
+func TestService_DeleteUser(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	userID := "dobow"
+
+	userRepository.Mock.On("DeleteUser", ctx, userID).Return(nil)
+
+	service := UserService{Repository: userRepository}
+	err := service.RemoveUser(ctx, userID)
+	if err != nil {
+		log.Printf("[TestService_DeleteUser][RemoveUser]: %s\n", err)
+	}
+
+	assert.NoError(t, err)
+}
