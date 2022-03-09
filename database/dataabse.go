@@ -7,7 +7,7 @@ import (
 )
 
 func NewDB() *sql.DB {
-	db, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/ecommerce")
+	db, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/ecommerce?parseTime=true")
 	if err != nil {
 		log.Printf("NewDB: %s\n", err)
 	}

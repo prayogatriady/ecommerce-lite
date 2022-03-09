@@ -7,12 +7,15 @@ import (
 
 	"github.com/prayogatriady/ecommerce-lite/model/table"
 	"github.com/prayogatriady/ecommerce-lite/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserServiceInterface interface {
 	GetAll() ([]table.UserDummy, error)
+
 	FindUsers(ctx context.Context) ([]table.User, error)
 	FindUserByUserID(ctx context.Context, userID string) (table.User, error)
+	Login(ctx context.Context, userID string, password string) (table.User, error)
 	SignUp(ctx context.Context, user table.User) (table.User, error)
 	EditProfile(ctx context.Context, user table.User) (table.User, error)
 	RemoveUser(ctx context.Context, userID string) error
@@ -50,11 +53,42 @@ func (s *UserService) FindUserByUserID(ctx context.Context, userID string) (tabl
 	return user, err
 }
 
+func (s *UserService) Login(ctx context.Context, userID string, password string) (table.User, error) {
+
+	userFound, err := s.Repository.SelectUserByUserID(ctx, userID)
+	if err != nil {
+		log.Printf("[UserService][Login][SelectUserByUserID]: %s\n", err)
+	}
+
+	var user table.User
+	// compare between hash password from db and inputted password from user
+	err = bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(password))
+	if err != nil {
+		log.Printf("[UserService][Login][CompareHashAndPassword]: %s\n", err)
+		return user, err
+	}
+
+	user, err = s.Repository.SelectByUserIDPassword(ctx, userID, userFound.Password)
+	if err != nil {
+		log.Printf("[UserService][Login][SelectByUserIDPassword]: %s\n", err)
+	}
+
+	return user, err
+}
+
 func (s *UserService) SignUp(ctx context.Context, user table.User) (table.User, error) {
 
 	user.FullName = strings.ToUpper(user.FullName)
 
-	user, err := s.Repository.InsertUser(ctx, user)
+	// encrypting the password
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		log.Printf("[UserService][SignUp][GenerateFromPassword]: %s\n", err)
+	}
+
+	user.Password = string(hashPassword)
+
+	user, err = s.Repository.InsertUser(ctx, user)
 	if err != nil {
 		log.Printf("[UserService][SignUp][InsertUser]: %s\n", err)
 	}

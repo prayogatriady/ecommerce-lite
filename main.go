@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/prayogatriady/ecommerce-lite/repository"
@@ -24,15 +26,17 @@ func main() {
 	// 	Password:   "admin1",
 	// 	GroupUser:  "ADMIN",
 	// 	Balance:    0,
-	// 	Phone:      "081234567891",
+	// 	Phone:      "081234567892",
 	// 	Email:      "admin1@gmail.com",
-	// 	IsCustomer: "Y",
+	// 	IsCustomer: "N",
 	// 	IsSeller:   "N",
 	// 	IsShipper:  "N",
 	// }
 
-	serv.RemoveUser(ctx, "aisyah")
+	// result, _ := serv.SignUp(ctx, user)
 
-	// bytes, _ := json.Marshal(result)
-	// fmt.Println(string(bytes))
+	result, _ := serv.Login(ctx, "admin1", "admin1")
+
+	bytes, _ := json.Marshal(result)
+	fmt.Println(string(bytes))
 }

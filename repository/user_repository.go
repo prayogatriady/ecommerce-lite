@@ -15,10 +15,10 @@ type UserRepositoryInterface interface {
 
 	SelectUsers(ctx context.Context) ([]table.User, error)
 	SelectUserByUserID(ctx context.Context, userID string) (table.User, error)
+	SelectByUserIDPassword(ctx context.Context, userID string, password string) (table.User, error)
 	InsertUser(ctx context.Context, user table.User) (table.User, error)
 	UpdateUser(ctx context.Context, user table.User) (table.User, error)
 	DeleteUser(ctx context.Context, userID string) error
-	// FindByUserIDPassword(ctx context.Context, user table.User) (table.User, error)
 }
 
 type UserRepository struct {
@@ -84,6 +84,32 @@ func (r *UserRepository) SelectUserByUserID(ctx context.Context, userID string) 
 			&user.IsCustomer, &user.IsSeller, &user.IsShipper, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			log.Printf("[UserRepository][SelectUserByUserID][Scan]: %s\n", err)
+		}
+	}
+
+	return user, err
+}
+
+func (r *UserRepository) SelectByUserIDPassword(ctx context.Context, userID string, password string) (table.User, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("[UserRepository][SelectByUserIDPassword][Begin]: %s\n", err)
+	}
+
+	query := `SELECT user_id, full_name, password, group_user, balance, phone, email, 
+	 		isCustomer, isSeller, isShipper, created_at, updated_at FROM users WHERE user_id = ? AND password = ?`
+	rows, err := tx.QueryContext(ctx, query, userID, password)
+	if err != nil {
+		log.Printf("[UserRepository][SelectByUserIDPassword][QueryContext]: %s\n", err)
+	}
+	defer rows.Close()
+
+	var user table.User
+	if rows.Next() {
+		err := rows.Scan(&user.UserID, &user.FullName, &user.Password, &user.GroupUser, &user.Balance, &user.Phone, &user.Email,
+			&user.IsCustomer, &user.IsSeller, &user.IsShipper, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			log.Printf("[UserRepository][SelectByUserIDPassword][Scan]: %s\n", err)
 		}
 	}
 

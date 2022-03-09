@@ -1,7 +1,7 @@
 CREATE TABLE users (
   user_id VARCHAR(20) NOT NULL,
   full_name VARCHAR(100) NOT NULL,
-  password VARCHAR(50) NOT NULL,
+  password VARCHAR(100) NOT NULL,
   group_user VARCHAR(20) NOT NULL DEFAULT 'USER',
   balance INT DEFAULT 0,
   phone VARCHAR(20) NOT NULL,

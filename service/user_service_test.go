@@ -73,6 +73,25 @@ func TestService_SelectUserByUserID(t *testing.T) {
 	assert.Equal(t, user.UserID, result.UserID)
 }
 
+func TestService_SelectByUserIDPassword(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	user := table.User{
+		UserID:   "dobow",
+		Password: "dobow",
+		Email:    "dobow@gmail.com",
+	}
+
+	userRepository.Mock.On("SelectByUserIDPassword", ctx, "dobow", "dobow").Return(user, nil)
+
+	service := UserService{Repository: userRepository}
+	_, err := service.Login(ctx, "dobow", "dobow")
+	if err != nil {
+		log.Printf("[TestService_SelectByUserIDPassword][Login]: %s\n", err)
+	}
+}
+
 func TestService_InsertUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
