@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/prayogatriady/ecommerce-lite/model/table"
 	"github.com/prayogatriady/ecommerce-lite/repository"
 	"github.com/prayogatriady/ecommerce-lite/service"
 )
@@ -35,7 +36,15 @@ func main() {
 
 	// result, _ := serv.SignUp(ctx, user)
 
-	result, _ := serv.Login(ctx, "admin1", "admin1")
+	address := table.UserAddress{
+		UserID:      "admin1",
+		AddressLine: "21 Baker Street",
+		PostalCode:  "99999",
+		City:        "London",
+		Phone:       "081234567892",
+	}
+
+	result, _ := serv.AddAddress(ctx, address)
 
 	bytes, _ := json.Marshal(result)
 	fmt.Println(string(bytes))

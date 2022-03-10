@@ -11,29 +11,20 @@ import (
 )
 
 type UserRepositoryInterface interface {
-	FindAll() ([]table.UserDummy, error)
-
 	SelectUsers(ctx context.Context) ([]table.User, error)
 	SelectUserByUserID(ctx context.Context, userID string) (table.User, error)
 	SelectByUserIDPassword(ctx context.Context, userID string, password string) (table.User, error)
 	InsertUser(ctx context.Context, user table.User) (table.User, error)
 	UpdateUser(ctx context.Context, user table.User) (table.User, error)
 	DeleteUser(ctx context.Context, userID string) error
+
+	InsertAddress(ctx context.Context, address table.UserAddress) (table.UserAddress, error)
 }
 
 type UserRepository struct {
 }
 
 var db *sql.DB = database.NewDB()
-
-func (r *UserRepository) FindAll() ([]table.UserDummy, error) {
-	users := []table.UserDummy{
-		{UserID: "dobow", Password: "pass"},
-		{UserID: "dobowski", Password: "pess"},
-	}
-
-	return users, nil
-}
 
 func (r *UserRepository) SelectUsers(ctx context.Context) ([]table.User, error) {
 	tx, err := db.Begin()
@@ -180,4 +171,24 @@ func (r *UserRepository) DeleteUser(ctx context.Context, userID string) error {
 	}
 
 	return err
+}
+
+func (r *UserRepository) InsertAddress(ctx context.Context, address table.UserAddress) (table.UserAddress, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("[UserRepository][InsertAddress][Begin]: %s\n", err)
+	}
+	defer tx.Rollback()
+
+	query := `INSERT INTO user_addresses (user_id, address_line, postal_code, city, phone) VALUES (?, ?, ?, ?, ?)`
+	_, err = tx.ExecContext(ctx, query, address.UserID, address.AddressLine, address.PostalCode, address.City, address.Phone)
+	if err != nil {
+		log.Printf("[UserRepository][InsertAddress][ExecContext]: %s\n", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Printf("[UserRepository][InsertAddress][Commit]: %s\n", err)
+	}
+
+	return address, err
 }

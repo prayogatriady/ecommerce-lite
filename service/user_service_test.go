@@ -15,19 +15,6 @@ import (
 
 var userRepository = &repository.UserRepositoryMock{Mock: mock.Mock{}}
 
-func TestService_GetUser(t *testing.T) {
-
-	userRepository.Mock.On("FindAll").Return([]table.UserDummy{}, nil)
-
-	service := UserService{Repository: userRepository}
-	users, _ := service.GetAll()
-	for i := range users {
-		fmt.Println(users[i].Password)
-		assert.Equal(t, users[i].Password, "*****", "user password must be encrypted")
-	}
-	fmt.Println(users)
-}
-
 func TestService_FindUsers(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -155,4 +142,36 @@ func TestService_RemoveUser(t *testing.T) {
 	}
 
 	assert.NoError(t, err)
+}
+
+func TestService_AddAddress(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	address := table.UserAddress{
+		UserID:      "dobow",
+		AddressLine: "21 Baker Street",
+		PostalCode:  "99999",
+		City:        "London",
+		Phone:       "081234567892",
+	}
+
+	user := table.User{
+		UserID:   "dobow",
+		Password: "dobow",
+		Email:    "dobow@gmail.com",
+	}
+
+	userRepository.Mock.On("SelectUserByUserID", ctx, user.UserID).Return(user, nil)
+
+	userRepository.Mock.On("InsertAddress", ctx, address).Return(nil)
+
+	service := UserService{Repository: userRepository}
+	result, err := service.AddAddress(ctx, address)
+	if err != nil {
+		log.Printf("[TestService_AddAddress][AddAddress]: %s\n", err)
+	}
+
+	assert.NoError(t, err)
+	assert.Equal(t, address.UserID, result.UserID)
 }

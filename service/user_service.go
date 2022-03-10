@@ -11,26 +11,18 @@ import (
 )
 
 type UserServiceInterface interface {
-	GetAll() ([]table.UserDummy, error)
-
 	FindUsers(ctx context.Context) ([]table.User, error)
 	FindUserByUserID(ctx context.Context, userID string) (table.User, error)
 	Login(ctx context.Context, userID string, password string) (table.User, error)
 	SignUp(ctx context.Context, user table.User) (table.User, error)
 	EditProfile(ctx context.Context, user table.User) (table.User, error)
 	RemoveUser(ctx context.Context, userID string) error
+
+	AddAddress(ctx context.Context, address table.UserAddress) (table.User, error)
 }
 
 type UserService struct {
 	Repository repository.UserRepositoryInterface
-}
-
-func (s *UserService) GetAll() ([]table.UserDummy, error) {
-	users, _ := s.Repository.FindAll()
-	for i := range users {
-		users[i].Password = "*****"
-	}
-	return users, nil
 }
 
 func (s *UserService) FindUsers(ctx context.Context) ([]table.User, error) {
@@ -114,4 +106,21 @@ func (s *UserService) RemoveUser(ctx context.Context, userID string) error {
 	}
 
 	return err
+}
+
+func (s *UserService) AddAddress(ctx context.Context, address table.UserAddress) (table.User, error) {
+
+	userFound, err := s.Repository.SelectUserByUserID(ctx, address.UserID)
+	if err != nil {
+		log.Printf("[UserService][AddAddress][SelectUserByUserID]: %s\n", err)
+	}
+
+	address, err = s.Repository.InsertAddress(ctx, address)
+	if err != nil {
+		log.Printf("[UserService][AddAddress][InsertAddress]: %s\n", err)
+	}
+
+	userFound.AddressDetail = append(userFound.AddressDetail, address)
+
+	return userFound, err
 }

@@ -11,16 +11,6 @@ type UserRepositoryMock struct {
 	Mock mock.Mock
 }
 
-func (r *UserRepositoryMock) FindAll() ([]table.UserDummy, error) {
-	args := r.Mock.Called()
-	// users := []table.UserDummy{
-	// 	{UserID: "mock", Password: "*****"},
-	// }
-
-	users := args.Get(0).([]table.UserDummy)
-	return users, args.Error(1)
-}
-
 func (r *UserRepositoryMock) SelectUsers(ctx context.Context) ([]table.User, error) {
 	args := r.Mock.Called(ctx)
 
@@ -85,4 +75,15 @@ func (r *UserRepositoryMock) DeleteUser(ctx context.Context, userID string) erro
 	r.Mock.Called(ctx, userID)
 
 	return nil
+}
+
+func (r *UserRepositoryMock) InsertAddress(ctx context.Context, address table.UserAddress) (table.UserAddress, error) {
+	args := r.Mock.Called(ctx, address)
+
+	if args.Get(0) == nil {
+		return address, nil
+	} else {
+		address = args.Get(0).(table.UserAddress)
+		return address, nil
+	}
 }
