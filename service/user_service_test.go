@@ -28,7 +28,7 @@ func TestService_GetUser(t *testing.T) {
 	fmt.Println(users)
 }
 
-func TestService_SelectUsers(t *testing.T) {
+func TestService_FindUsers(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -42,7 +42,7 @@ func TestService_SelectUsers(t *testing.T) {
 	service := UserService{Repository: userRepository}
 	result, err := service.FindUsers(ctx)
 	if err != nil {
-		log.Printf("[TestService_SelectUsers][FindUsers]: %s\n", err)
+		log.Printf("[TestService_FindUsers][FindUsers]: %s\n", err)
 	}
 
 	fmt.Println(users)
@@ -50,7 +50,7 @@ func TestService_SelectUsers(t *testing.T) {
 	assert.Equal(t, users[0].UserID, result[0].UserID)
 }
 
-func TestService_SelectUserByUserID(t *testing.T) {
+func TestService_FindUserByUserID(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -65,7 +65,7 @@ func TestService_SelectUserByUserID(t *testing.T) {
 	service := UserService{Repository: userRepository}
 	result, err := service.FindUserByUserID(ctx, "dobow")
 	if err != nil {
-		log.Printf("[TestService_SelectUserByUserID][FindUserByUserID]: %s\n", err)
+		log.Printf("[TestService_FindUserByUserID][FindUserByUserID]: %s\n", err)
 	}
 
 	fmt.Println(user)
@@ -73,26 +73,28 @@ func TestService_SelectUserByUserID(t *testing.T) {
 	assert.Equal(t, user.UserID, result.UserID)
 }
 
-func TestService_SelectByUserIDPassword(t *testing.T) {
+func TestService_Login(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	user := table.User{
-		UserID:   "dobow",
-		Password: "dobow",
-		Email:    "dobow@gmail.com",
+		UserID:   "admin1",
+		Password: "$2a$14$nOPYIXy/q8n1xcG0L5f0N.B0UxZyxZT43KR.7eMdpsk9ZKSXWzV7y",
+		Email:    "admin1@gmail.com",
 	}
 
-	userRepository.Mock.On("SelectByUserIDPassword", ctx, "dobow", "dobow").Return(user, nil)
+	userRepository.Mock.On("SelectUserByUserID", ctx, user.UserID).Return(user, nil)
+
+	userRepository.Mock.On("SelectByUserIDPassword", ctx, user.UserID, user.Password).Return(user, nil)
 
 	service := UserService{Repository: userRepository}
-	_, err := service.Login(ctx, "dobow", "dobow")
+	_, err := service.Login(ctx, user.UserID, "admin1")
 	if err != nil {
-		log.Printf("[TestService_SelectByUserIDPassword][Login]: %s\n", err)
+		log.Printf("[TestService_Login][Login]: %s\n", err)
 	}
 }
 
-func TestService_InsertUser(t *testing.T) {
+func TestService_SignUp(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -107,7 +109,7 @@ func TestService_InsertUser(t *testing.T) {
 	service := UserService{Repository: userRepository}
 	result, err := service.SignUp(ctx, user)
 	if err != nil {
-		log.Printf("[TestService_InsertUser][SignUp]: %s\n", err)
+		log.Printf("[TestService_SignUp][SignUp]: %s\n", err)
 	}
 
 	fmt.Println(user)
@@ -115,7 +117,7 @@ func TestService_InsertUser(t *testing.T) {
 	assert.Equal(t, user.UserID, result.UserID)
 }
 
-func TestService_UpdateUser(t *testing.T) {
+func TestService_EditProfile(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -130,7 +132,7 @@ func TestService_UpdateUser(t *testing.T) {
 	service := UserService{Repository: userRepository}
 	result, err := service.EditProfile(ctx, user)
 	if err != nil {
-		log.Printf("[TestService_UpdateUser][EditProfile]: %s\n", err)
+		log.Printf("[TestService_EditProfile][EditProfile]: %s\n", err)
 	}
 
 	fmt.Println(user)
@@ -138,7 +140,7 @@ func TestService_UpdateUser(t *testing.T) {
 	assert.Equal(t, user.UserID, result.UserID)
 }
 
-func TestService_DeleteUser(t *testing.T) {
+func TestService_RemoveUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -149,7 +151,7 @@ func TestService_DeleteUser(t *testing.T) {
 	service := UserService{Repository: userRepository}
 	err := service.RemoveUser(ctx, userID)
 	if err != nil {
-		log.Printf("[TestService_DeleteUser][RemoveUser]: %s\n", err)
+		log.Printf("[TestService_RemoveUser][RemoveUser]: %s\n", err)
 	}
 
 	assert.NoError(t, err)
