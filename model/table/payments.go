@@ -7,6 +7,7 @@ type Payment struct {
 	PaymentName string
 	IsActive    string
 	CreatedBy   string
-	Created_at  time.Time
-	Updated_at  time.Time
+	UpdatedBy   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
