@@ -1,3 +1,4 @@
 github.com/stretchr/testify
 github.com/go-sql-driver/mysql
 golang.org/x/crypto/bcrypt
+github.com/gin-gonic/gin

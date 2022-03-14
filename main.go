@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/prayogatriady/ecommerce-lite/repository"
@@ -12,8 +14,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	repo := repository.PaymentRepository{}
-	serv := service.PaymentService{Repository: &repo}
+	repo := repository.UserRepository{}
+	serv := service.UserService{Repository: &repo}
 	// users, _ := serv.FindUsers(ctx)
 
 	// user, _ := serv.FindUserByUserID(ctx, "dobow")
@@ -47,7 +49,8 @@ func main() {
 	// 	fmt.Println(string(bytes))
 	// }
 
-	serv.DeactivatePayment(ctx, 3, "ADMIN")
-	// bytes, _ := json.Marshal(result)
-	// fmt.Println(string(bytes))
+	result, _ := serv.FindUserByUserID(ctx, "admin3")
+	bytes, _ := json.Marshal(result)
+	fmt.Println(string(bytes))
+	fmt.Println(result.UserID)
 }
