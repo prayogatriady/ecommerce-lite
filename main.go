@@ -1,21 +1,32 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"time"
+	"log"
 
+	"github.com/gin-gonic/gin"
+	"github.com/prayogatriady/ecommerce-lite/controller"
 	"github.com/prayogatriady/ecommerce-lite/repository"
 	"github.com/prayogatriady/ecommerce-lite/service"
 )
 
-func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+var PORT string = "3003"
 
-	repo := repository.UserRepository{}
-	serv := service.UserService{Repository: &repo}
+func main() {
+
+	userRepo := repository.UserRepository{}
+	userServ := service.UserService{Repository: &userRepo}
+	userCont := controller.UserController{Service: &userServ}
+
+	router := gin.New()
+	router.Use(gin.Logger())
+
+	router.POST("/signup", userCont.Signup)
+
+	log.Printf("Server running on port %s.. \n", PORT)
+	if err := router.Run(":" + PORT); err != nil {
+		log.Fatalf("Error when running port %s \n", PORT)
+	}
+
 	// users, _ := serv.FindUsers(ctx)
 
 	// user, _ := serv.FindUserByUserID(ctx, "dobow")
@@ -49,8 +60,8 @@ func main() {
 	// 	fmt.Println(string(bytes))
 	// }
 
-	result, _ := serv.FindUserByUserID(ctx, "admin3")
-	bytes, _ := json.Marshal(result)
-	fmt.Println(string(bytes))
-	fmt.Println(result.UserID)
+	// result, _ := serv.FindUserByUserID(ctx, "admin3")
+	// bytes, _ := json.Marshal(result)
+	// fmt.Println(string(bytes))
+	// fmt.Println(result.UserID)
 }
