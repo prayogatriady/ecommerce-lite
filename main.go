@@ -20,6 +20,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 
+	router.GET("/users", userCont.FindAllUser)
 	router.POST("/signup", userCont.Signup)
 
 	log.Printf("Server running on port %s.. \n", PORT)

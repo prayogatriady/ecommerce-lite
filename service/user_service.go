@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log"
 	"strings"
 
@@ -30,9 +31,10 @@ func (s *UserService) FindUsers(ctx context.Context) ([]table.User, error) {
 	user, err := s.Repository.SelectUsers(ctx)
 	if err != nil {
 		log.Printf("[UserService][FindUsers][SelectUsers]: %s\n", err)
+		return user, errors.New("An error occured while checking finding users")
 	}
 
-	return user, err
+	return user, nil
 }
 
 func (s *UserService) FindUserByUserID(ctx context.Context, userID string) (table.User, error) {
@@ -40,9 +42,13 @@ func (s *UserService) FindUserByUserID(ctx context.Context, userID string) (tabl
 	user, err := s.Repository.SelectUserByUserID(ctx, userID)
 	if err != nil {
 		log.Printf("[UserService][FindUserByUserID][SelectUserByUserID]: %s\n", err)
+		return user, errors.New("An error occured while checking for the email")
+	}
+	if user.UserID != "" {
+		return user, errors.New("Email already used")
 	}
 
-	return user, err
+	return user, nil
 }
 
 func (s *UserService) Login(ctx context.Context, userID string, password string) (table.User, error) {
@@ -57,7 +63,6 @@ func (s *UserService) Login(ctx context.Context, userID string, password string)
 	err = bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(password))
 	if err != nil {
 		log.Printf("[UserService][Login][CompareHashAndPassword]: %s\n", err)
-		return user, err
 	}
 
 	user, err = s.Repository.SelectByUserIDPassword(ctx, userID, userFound.Password)
@@ -76,6 +81,7 @@ func (s *UserService) SignUp(ctx context.Context, user table.User) (table.User, 
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
 		log.Printf("[UserService][SignUp][GenerateFromPassword]: %s\n", err)
+		return user, errors.New("An error occured while checking password")
 	}
 
 	user.Password = string(hashPassword)
@@ -83,9 +89,10 @@ func (s *UserService) SignUp(ctx context.Context, user table.User) (table.User, 
 	user, err = s.Repository.InsertUser(ctx, user)
 	if err != nil {
 		log.Printf("[UserService][SignUp][InsertUser]: %s\n", err)
+		return user, errors.New("An error occured while signing up")
 	}
 
-	return user, err
+	return user, nil
 }
 
 func (s *UserService) EditProfile(ctx context.Context, user table.User) (table.User, error) {

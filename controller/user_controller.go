@@ -44,15 +44,7 @@ func (uc *UserController) Signup(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "500 - INTERNAL SERVER ERROR",
-			"message": "An error occured while checking for the email"},
-		)
-		return
-	}
-
-	if result.UserID != "" {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  "500 - INTERNAL SERVER ERROR",
-			"message": "Email already used"},
+			"message": err},
 		)
 		return
 	}
@@ -60,13 +52,41 @@ func (uc *UserController) Signup(c *gin.Context) {
 	if _, err := uc.Service.SignUp(ctx, userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "400 - BAD REQUEST",
-			"message": err.Error(),
+			"message": err,
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "200 - OK",
-		"message": "User created",
+		"message": result,
+	})
+}
+
+func (uc *UserController) FindAllUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// if userTypeRequest := c.GetString("userType"); userTypeRequest != "ADMIN" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"status":  "400 - BAD REQUEST",
+	// 		"message": "Admin required",
+	// 	})
+	// 	return
+	// }
+
+	var users []table.User
+	users, err := uc.Service.FindUsers(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "500 - INTERNAL SERVER ERROR",
+			"message": err},
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "200 - OK",
+		"message": users,
 	})
 }
