@@ -67,14 +67,6 @@ func (uc *UserController) FindAllUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// if userTypeRequest := c.GetString("userType"); userTypeRequest != "ADMIN" {
-	// 	c.JSON(http.StatusBadRequest, gin.H{
-	// 		"status":  "400 - BAD REQUEST",
-	// 		"message": "Admin required",
-	// 	})
-	// 	return
-	// }
-
 	var users []table.User
 	users, err := uc.Service.FindUsers(ctx)
 	if err != nil {
