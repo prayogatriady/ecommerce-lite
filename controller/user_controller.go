@@ -26,6 +26,28 @@ type UserController struct {
 	Service service.UserServiceInterface
 }
 
+func (uc *UserController) Profile(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	userID := c.Param("userid")
+
+	var user table.User
+	user, err := uc.Service.FindUserProfile(ctx, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "400 - BAD REQUEST",
+			"message": err.Error()},
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "200 - OK",
+		"message": user,
+	})
+}
+
 func (uc *UserController) Signup(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -44,7 +66,7 @@ func (uc *UserController) Signup(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "500 - INTERNAL SERVER ERROR",
-			"message": err},
+			"message": err.Error()},
 		)
 		return
 	}
@@ -52,7 +74,7 @@ func (uc *UserController) Signup(c *gin.Context) {
 	if _, err := uc.Service.SignUp(ctx, userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "400 - BAD REQUEST",
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
@@ -72,7 +94,7 @@ func (uc *UserController) FindAllUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "500 - INTERNAL SERVER ERROR",
-			"message": err},
+			"message": err.Error()},
 		)
 		return
 	}

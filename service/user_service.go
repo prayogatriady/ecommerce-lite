@@ -14,6 +14,7 @@ import (
 type UserServiceInterface interface {
 	FindUsers(ctx context.Context) ([]table.User, error)
 	FindUserByUserID(ctx context.Context, userID string) (table.User, error)
+	FindUserProfile(ctx context.Context, userID string) (table.User, error)
 	Login(ctx context.Context, userID string, password string) (table.User, error)
 	SignUp(ctx context.Context, user table.User) (table.User, error)
 	EditProfile(ctx context.Context, user table.User) (table.User, error)
@@ -31,7 +32,7 @@ func (s *UserService) FindUsers(ctx context.Context) ([]table.User, error) {
 	user, err := s.Repository.SelectUsers(ctx)
 	if err != nil {
 		log.Printf("[UserService][FindUsers][SelectUsers]: %s\n", err)
-		return user, errors.New("An error occured while checking finding users")
+		return user, errors.New("An error occured while finding users")
 	}
 
 	return user, nil
@@ -42,10 +43,24 @@ func (s *UserService) FindUserByUserID(ctx context.Context, userID string) (tabl
 	user, err := s.Repository.SelectUserByUserID(ctx, userID)
 	if err != nil {
 		log.Printf("[UserService][FindUserByUserID][SelectUserByUserID]: %s\n", err)
-		return user, errors.New("An error occured while checking for the email")
+		return user, errors.New("An error occured while checking users")
 	}
 	if user.UserID != "" {
-		return user, errors.New("Email already used")
+		return user, errors.New("UserID already used")
+	}
+
+	return user, nil
+}
+
+func (s *UserService) FindUserProfile(ctx context.Context, userID string) (table.User, error) {
+
+	user, err := s.Repository.SelectUserByUserID(ctx, userID)
+	if err != nil {
+		log.Printf("[UserService][FindUserProfile][SelectUserByUserID]: %s\n", err)
+		return user, errors.New("An error occured while getting your profile")
+	}
+	if user.UserID == "" {
+		return user, errors.New("UserID is not found")
 	}
 
 	return user, nil
