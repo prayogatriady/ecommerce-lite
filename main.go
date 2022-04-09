@@ -23,6 +23,7 @@ func main() {
 	router.GET("/users", userCont.FindAllUser)
 	router.POST("/signup", userCont.Signup)
 	router.GET("/profile/:userid", userCont.Profile)
+	router.PUT("/edit/:userid", userCont.EditProfile)
 
 	log.Printf("Server running on port %s.. \n", PORT)
 	if err := router.Run(":" + PORT); err != nil {

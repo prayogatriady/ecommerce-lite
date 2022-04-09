@@ -113,7 +113,16 @@ func (s *UserService) SignUp(ctx context.Context, user table.User) (table.User, 
 func (s *UserService) EditProfile(ctx context.Context, user table.User) (table.User, error) {
 	user.FullName = strings.ToUpper(user.FullName)
 
-	user, err := s.Repository.UpdateUser(ctx, user)
+	// encrypting the password
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		log.Printf("[UserService][EditProfile][GenerateFromPassword]: %s\n", err)
+		return user, errors.New("An error occured while checking password")
+	}
+
+	user.Password = string(hashPassword)
+
+	user, err = s.Repository.UpdateUser(ctx, user)
 	if err != nil {
 		log.Printf("[UserService][EditProfile][UpdateUser]: %s\n", err)
 	}

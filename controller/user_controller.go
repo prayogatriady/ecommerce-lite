@@ -26,6 +26,35 @@ type UserController struct {
 	Service service.UserServiceInterface
 }
 
+func (uc *UserController) EditProfile(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	userID := c.Param("userid")
+
+	var userRequest table.User = table.User{UserID: userID}
+	if err := c.BindJSON(&userRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "400 - BAD REQUEST",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if _, err := uc.Service.EditProfile(ctx, userRequest); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "500 - INTERNAL SERVER ERROR",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "200 - OK",
+		"message": "Updated",
+	})
+}
+
 func (uc *UserController) Profile(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
